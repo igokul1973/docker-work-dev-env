@@ -1,0 +1,73 @@
+version: '2'
+
+services:
+
+    proxy:
+        container_name: work-dev-proxy
+        image: jwilder/nginx-proxy
+        ports:
+            - 80:80
+            # - 443:443
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock:ro
+            # - ./src/certs.d:/etc/nginx/certs:ro
+        networks:
+            webprojects: {}
+        restart: always
+    mysql:
+        container_name: work-dev-mysql
+        image: mysql
+        volumes:
+            - ./src/mysql/data:/var/lib/mysql
+        ports:
+            - 3306:3306
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+        networks:
+            webprojects: {}
+        restart: always
+                              
+
+    # postgres:
+    #    container_name: dev-work-postgres
+    #    image: sameersbn/postgresql:9.6-2
+    #    volumes:
+    #        - ./src/postgresql/data:/var/lib/postgresql
+    #    ports:
+    #        - 5432:5432
+    #    environment:
+    #        - PG_PASSWORD=postgres
+    #        - DB_USER=igor
+    #        - DB_PASS=secretpassword
+    #    networks:
+    #        webprojects: {}
+
+    symfony-demo.dev:
+        container_name: work-symfony-test
+        image: git.yourdeveloper.tk:6789/igor/docker-work-dev-env/work-symfony-test:1.0.0
+        # build:
+        #   context: .
+        #   dockerfile: ./src/work-symfony-test/Dockerfile
+        depends_on:
+            - mysql
+        volumes:
+            - ./work-symfony-test.dev:/var/www/html
+            - ./src/xdebug/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+        environment:
+            - VIRTUAL_HOST=test.itransition.local,test.local
+            - VIRTUAL_HOST_ALIAS=symfony-test.local
+            - DOC_ROOT=/var/www/html/public
+            - XDEBUG_IDE_KEY=test
+            - XDEBUG_LOG=/var/www/html/var/log/xdebug.log
+            - XDEBUG_REMOTE_HOST=178.20.0.1
+            - VIRTUAL_PROTO=http
+        networks:
+            webprojects: {}
+
+networks: 
+    webprojects:
+        ipam:
+            driver: default
+            config:
+                - subnet: 178.20.0.0/16
+                  gateway: 178.20.0.1
