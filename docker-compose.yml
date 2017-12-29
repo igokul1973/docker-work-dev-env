@@ -14,11 +14,25 @@ services:
         networks:
             webprojects: {}
         restart: always
-    mysql:
-        container_name: work-dev-mysql
-        image: mysql
+    # mysql-5.7:
+        # container_name: work-dev-mysql-5.7
+        # image: mysql
+        # volumes:
+            # - ./src/mysql/data/5.7:/var/lib/mysql
+        # ports:
+            # - 3306:3306
+        # environment:
+            # MYSQL_ROOT_PASSWORD: root
+        # networks:
+            # webprojects: {}
+        # restart: always
+
+    mysql-5.6:
+        container_name: work-dev-mysql-5.6
+        image: mysql:5.6.38
         volumes:
-            - ./src/mysql/data:/var/lib/mysql
+            - ./src/mysql/5.6/data:/var/lib/mysql
+            - ./src/mysql/5.6/magento_sample_data_for_1.9.2.4.sql:/root/magento_sample_data_for_1.9.2.4.sql
         ports:
             - 3306:3306
         environment:
@@ -26,7 +40,6 @@ services:
         networks:
             webprojects: {}
         restart: always
-                              
 
     # postgres:
     #    container_name: dev-work-postgres
@@ -41,28 +54,50 @@ services:
     #        - DB_PASS=secretpassword
     #    networks:
     #        webprojects: {}
-
-    symfony-demo.dev:
-        container_name: work-symfony-test
-        image: git.yourdeveloper.tk:6789/igor/docker-work-dev-env/work-symfony-test:1.0.0
-        # build:
-        #   context: .
-        #   dockerfile: ./src/work-symfony-test/Dockerfile
+    
+    magento-test.dev:
+        container_name: work-magento-test
+        image: git.yourdeveloper.tk:6789/igor/docker-work-dev-env/work-magento-test:1.0.0
         depends_on:
-            - mysql
+            - mysql-5.6
         volumes:
-            - ./work-symfony-test.dev:/var/www/html
+            - ./work-magento-test.l:/var/www/html
             - ./src/xdebug/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
         environment:
-            - VIRTUAL_HOST=test.itransition.local,test.local
-            - VIRTUAL_HOST_ALIAS=symfony-test.local
-            - DOC_ROOT=/var/www/html/public
-            - XDEBUG_IDE_KEY=test
+            - VIRTUAL_HOST=magento.itransition.l,magento.l
+            - VIRTUAL_HOST_ALIAS=magento-test.l
+            - DOC_ROOT=/var/www/html
+            - XDEBUG_IDE_KEY=magento
             - XDEBUG_LOG=/var/www/html/var/log/xdebug.log
             - XDEBUG_REMOTE_HOST=178.20.0.1
             - VIRTUAL_PROTO=http
+        extra_hosts:
+            - "magento.l:127.0.0.1"
+            - "magento-test.l:127.0.0.1"
         networks:
             webprojects: {}
+
+    # symfony-demo.dev:
+        # container_name: work-symfony-test
+        #image: git.yourdeveloper.tk:6789/igor/docker-work-dev-env/work-symfony-test:1.0.0
+        # build:
+        #   context: .
+        #   dockerfile: ./src/work-symfony-test/Dockerfile
+        #depends_on:
+        #    - mysql-5.7
+        #volumes:
+        #    - ./work-symfony-test.dev:/var/www/html
+        #    - ./src/xdebug/xdebug.ini:/usr/local/etc/php/conf.d/xdebug.ini
+        #environment:
+        #    - VIRTUAL_HOST=test.itransition.local,test.local
+        #    - VIRTUAL_HOST_ALIAS=symfony-test.local
+        #    - DOC_ROOT=/var/www/html/public
+        #    - XDEBUG_IDE_KEY=test
+        #    - XDEBUG_LOG=/var/www/html/var/log/xdebug.log
+        #    - XDEBUG_REMOTE_HOST=178.20.0.1
+        #    - VIRTUAL_PROTO=http
+        #networks:
+        #    webprojects: {}
 
 networks: 
     webprojects:

@@ -1,0 +1,6 @@
+# Ignore all these files and folders during image build process
+src/mysql/*
+src/pgsql/*
+*.dev
+*.local
+*.l

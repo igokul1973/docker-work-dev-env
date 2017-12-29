@@ -100,6 +100,9 @@ alias lsd='ls -lsd'
 alias c='clear'
 alias quit='exit'
 alias q='exit'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
 
 # Add an "alert" alias for long running commands.  Use like so:
 #   sleep 10; alert
